@@ -1,4 +1,4 @@
-# Apna Store Project
+# Apna Store Project 🛒
 
 ## Table of Contents
 - [Introduction](#introduction)
