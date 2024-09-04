@@ -3,7 +3,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:fake_store/services/network_connectivity.dart';
+import 'package:fake_store/services/utilites/network_connectivity.dart';
 import 'package:fake_store/views/authentications/login.dart';
 import 'package:fake_store/views/products.dart';
 import 'package:flutter/material.dart';

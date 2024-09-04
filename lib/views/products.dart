@@ -8,12 +8,13 @@ import 'package:fake_store/Models/getFavourites.dart';
 import 'package:fake_store/Models/getusers.dart';
 import 'package:fake_store/cartProvider.dart';
 import 'package:fake_store/database/db_helper.dart';
+import 'package:fake_store/components/custom_alert_dialog.dart';
 import 'package:fake_store/views/authentications/login.dart';
 import 'package:fake_store/views/cartpage.dart';
 import 'package:fake_store/views/favourite.dart';
-import 'package:fake_store/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -180,14 +181,32 @@ class _ProductsState extends State<Products> {
 
     final cart = Provider.of<CartProvider>(context);
     return PopScope(
-      canPop: false,
-      // onPopInvoked: (didPop) {
-      //   if (didPop) {
-      //     return;
-      //   }
-      //   Navigator.push(
-      //       context, MaterialPageRoute(builder: (context) => SplashScreen()));
-      // },
+      canPop: false, // Prevent default pop behavior
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          // Show the dialog to confirm exit
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return CustomAlertDialog(
+                onPressed: () async {
+                  // Perform the logout or session destruction
+                  await SessionManager().destroy();
+
+                  if (Platform.isAndroid) {
+                    SystemNavigator.pop();
+                  } else if (Platform.isIOS) {
+                    exit(0);
+                  }
+                },
+                imagePath: 'assets/images/exit_app.png',
+                text: 'Exit',
+              );
+            },
+          );
+        }
+      },
+
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF364960),
@@ -268,8 +287,6 @@ class _ProductsState extends State<Products> {
             child: CircleAvatar(
               backgroundColor: Colors.white,
               radius: 40,
-              backgroundImage:
-                  imagePath.isNotEmpty ? FileImage(File(imagePath)) : null,
               child: imagePath.isEmpty
                   ? IconButton(
                       onPressed: pickImage,
@@ -279,7 +296,42 @@ class _ProductsState extends State<Products> {
                         color: Color(0xFF364960),
                       ),
                     )
-                  : null,
+                  : Stack(alignment: Alignment.topRight, children: [
+                      Container(
+                        height: 150,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
+                            image: FileImage(File(imagePath)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.black,
+                        child: Center(
+                          child: IconButton(
+                              onPressed: () async {
+                                setState(() {
+                                  imagePath = '';
+                                });
+                                print(imagePath);
+                                await dbHelper?.updateUser(User(
+                                  user_id: widget.user_id,
+                                  user_name: widget.user_name,
+                                  user_email: widget.user_email,
+                                  user_password: widget.user_password,
+                                  user_image: imagePath,
+                                ));
+                              },
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              )),
+                        ),
+                      )
+                    ]),
             ),
           ),
           Column(
