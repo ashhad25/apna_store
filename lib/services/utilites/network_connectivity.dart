@@ -28,7 +28,8 @@ class InternetConnectivityHelper {
           onPressed: () {
             retryNavigation(context);
           },
-          text: 'Retry',
+          text1: 'Are you sure you want to retry?',
+          text2: 'Retry',
           imagePath: 'assets/images/no_connection.png',
         );
       },
