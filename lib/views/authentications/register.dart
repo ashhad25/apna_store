@@ -101,6 +101,8 @@ class _SignUpState extends State<SignUp> {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('User registered successfully!'),
                           backgroundColor: Colors.green,
+                          showCloseIcon: true,
+                          closeIconColor: Colors.white,
                         ));
 
                         Navigator.pushReplacement(context,
@@ -109,6 +111,8 @@ class _SignUpState extends State<SignUp> {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('User already exists!'),
                           backgroundColor: Colors.red,
+                          showCloseIcon: true,
+                          closeIconColor: Colors.white,
                         ));
                       }
                     }
