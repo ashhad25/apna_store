@@ -5,11 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 // ignore: must_be_immutable
 class CustomAlertDialog extends StatelessWidget {
-  Function? onPressed;
-  String imagePath, text;
+  VoidCallback? onPressed;
+  String imagePath, text1, text2;
 
   CustomAlertDialog(
-      {required this.onPressed, required this.imagePath, required this.text});
+      {required this.onPressed,
+      required this.imagePath,
+      required this.text1,
+      required this.text2});
 
   @override
   Widget build(BuildContext context) {
@@ -27,17 +30,25 @@ class CustomAlertDialog extends StatelessWidget {
           SizedBox(
             height: 20,
           ),
+          Text(text1,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.openSans(
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF364960),
+              )),
+          SizedBox(
+            height: 30,
+          ),
           Row(
             children: [
               Container(
                 width: 100,
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: () {
-                    onPressed!();
-                  },
+                  onPressed: onPressed,
                   child: Text(
-                    text,
+                    text2,
                     style: GoogleFonts.poppins(color: Colors.white),
                   ),
                   style: ButtonStyle(
