@@ -14,7 +14,6 @@ import 'package:fake_store/views/cartpage.dart';
 import 'package:fake_store/views/favourite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -184,24 +183,26 @@ class _ProductsState extends State<Products> {
       canPop: false, // Prevent default pop behavior
       onPopInvoked: (didPop) {
         if (!didPop) {
-          // Show the dialog to confirm exit
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return CustomAlertDialog(
-                onPressed: () async {
-                  // Perform the logout or session destruction
-                  await SessionManager().destroy();
-
-                  if (Platform.isAndroid) {
-                    SystemNavigator.pop();
-                  } else if (Platform.isIOS) {
-                    exit(0);
-                  }
-                },
-                imagePath: 'assets/images/exit_app.png',
-                text: 'Exit',
-              );
+                  onPressed: () async {
+                    SharedPreferences sp =
+                        await SharedPreferences.getInstance();
+                    sp.remove('isLogin');
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('User logged out successfully.'),
+                      backgroundColor: Colors.green,
+                      closeIconColor: Colors.white,
+                      showCloseIcon: true,
+                    ));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => Login()));
+                  },
+                  imagePath: 'assets/images/exit_app.png',
+                  text1: 'Are you sure you want to logout?',
+                  text2: 'Logout');
             },
           );
         }
@@ -284,55 +285,56 @@ class _ProductsState extends State<Products> {
       child: ListView(
         children: [
           DrawerHeader(
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 40,
-              child: imagePath.isEmpty
-                  ? IconButton(
+            child: imagePath.isEmpty
+                ? CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 40,
+                    child: IconButton(
                       onPressed: pickImage,
                       icon: Icon(
                         Icons.add_a_photo,
                         size: 30,
                         color: Color(0xFF364960),
                       ),
-                    )
-                  : Stack(alignment: Alignment.topRight, children: [
-                      Container(
-                        height: 150,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          image: DecorationImage(
+                    ),
+                  )
+                : Stack(alignment: Alignment.topRight, children: [
+                    Container(
+                      height: 150,
+                      // width: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        image: DecorationImage(
                             image: FileImage(File(imagePath)),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                            fit: BoxFit.fill,
+                            filterQuality: FilterQuality.high),
                       ),
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.black,
-                        child: Center(
-                          child: IconButton(
-                              onPressed: () async {
-                                setState(() {
-                                  imagePath = '';
-                                });
-                                print(imagePath);
-                                await dbHelper?.updateUser(User(
-                                  user_id: widget.user_id,
-                                  user_name: widget.user_name,
-                                  user_email: widget.user_email,
-                                  user_password: widget.user_password,
-                                  user_image: imagePath,
-                                ));
-                              },
-                              icon: Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              )),
-                        ),
-                      )
-                    ]),
-            ),
+                    ),
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.black,
+                      child: Center(
+                        child: IconButton(
+                            onPressed: () async {
+                              setState(() {
+                                imagePath = '';
+                              });
+                              print(imagePath);
+                              await dbHelper?.updateUser(User(
+                                user_id: widget.user_id,
+                                user_name: widget.user_name,
+                                user_email: widget.user_email,
+                                user_password: widget.user_password,
+                                user_image: imagePath,
+                              ));
+                            },
+                            icon: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            )),
+                      ),
+                    )
+                  ]),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,28 +359,49 @@ class _ProductsState extends State<Products> {
                   style: TextStyle(fontSize: 12, color: Colors.white),
                 ),
               ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    SharedPreferences sp =
-                        await SharedPreferences.getInstance();
-                    sp.remove('isLogin');
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('User logged out successfully.'),
-                      backgroundColor: Colors.green,
-                    ));
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => Login()),
-                    );
-                  },
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll(Colors.transparent),
+              SizedBox(
+                height: 10,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 200,
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CustomAlertDialog(
+                              onPressed: () async {
+                                SharedPreferences sp =
+                                    await SharedPreferences.getInstance();
+                                sp.remove('isLogin');
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content:
+                                      Text('User logged out successfully.'),
+                                  backgroundColor: Colors.green,
+                                  closeIconColor: Colors.white,
+                                  showCloseIcon: true,
+                                ));
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Login()));
+                              },
+                              imagePath: 'assets/images/exit_app.png',
+                              text1: 'Are you sure you want to logout?',
+                              text2: 'Logout');
+                        },
+                      );
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll(Colors.transparent),
+                    ),
+                    child: Text('Logout'),
                   ),
-                  child: Text('Logout'),
                 ),
               )
             ],
